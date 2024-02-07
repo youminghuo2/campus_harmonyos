@@ -1,0 +1,48 @@
+{
+  "string": [
+    {
+      "name": "module_desc",
+      "value": "module description"
+    },
+    {
+      "name": "EntryAbility_desc",
+      "value": "description"
+    },
+    {
+      "name": "EntryAbility_label",
+      "value": "label"
+    },
+    {
+      "name": "LoginHome_title",
+      "value": "欢迎登录江阴智慧云校"
+    },
+    {
+      "name": "psd",
+      "value": "账号密码"
+    },
+    {
+      "name": "sms_verity",
+      "value": "短信验证"
+    },
+    {
+      "name": "account_input",
+      "value": "请输入账号"
+    },
+    {
+      "name": "phone_input",
+      "value": "请输入手机号码"
+    },
+    {
+      "name": "psd_input",
+      "value": "请输入密码"
+    },
+    {
+      "name": "smsPsd_input",
+      "value": "请输入验证码"
+    },
+    {
+      "name": "login_at",
+      "value": "立即登录"
+    }
+  ]
+}
