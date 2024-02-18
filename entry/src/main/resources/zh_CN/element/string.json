@@ -18,7 +18,7 @@
     },
     {
       "name": "psd",
-      "value":"账号密码"
+      "value": "账号密码"
     },
     {
       "name": "sms_verity",
@@ -27,18 +27,38 @@
     {
       "name": "account_input",
       "value": "请输入账号"
-    },{
+    },
+    {
       "name": "phone_input",
       "value": "请输入手机号码"
-    },{
+    },
+    {
       "name": "psd_input",
       "value": "请输入密码"
-    },{
+    },
+    {
       "name": "smsPsd_input",
       "value": "请输入验证码"
-    },{
+    },
+    {
       "name": "login_at",
       "value": "立即登录"
+    },
+    {
+      "name": "agree_privacy",
+      "value": "我已阅读并同意"
+    },
+    {
+      "name": "user_agree",
+      "value": "用户协议"
+    },
+    {
+      "name": "privacy_policy",
+      "value": "隐私政策"
+    },
+    {
+      "name": "and",
+      "value": "和"
     }
   ]
 }
