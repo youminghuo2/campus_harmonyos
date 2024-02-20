@@ -1,6 +1,7 @@
 // @ts-ignore
 import CommonUtils from '../common/CommonUtils'
 import Logger from '../common/Logger'
+import { getLoginPsdList } from '../network/api/basicdataApi'
 
 
 
@@ -149,7 +150,15 @@ struct LoginHome {
         .opacity(
           // 0.5
           CommonUtils.checkIsEmptyLogin(this.accountText, this.psdText) ? 1 : 0.5
-        )
+        ).onClick(async ()=>{
+         let map=new Map<string,string>()
+         map["username"]="33776311585"
+         // map["encryptPwd"]="43181cec2a36fb47203b17eb4405acfc"
+        map["encryptPwd"]=  await CommonUtils.getMd5String("qqqq!1111")
+         map["clientType"]="ANDROID"
+         map["clientVersion"]="2.7.18"
+        getLoginPsdList(map)
+      })
 
       Row() {
         Text('注册').fontSize('13fp').fontColor($r('app.color.color_646464'))

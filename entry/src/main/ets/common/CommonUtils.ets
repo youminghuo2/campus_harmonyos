@@ -1,6 +1,9 @@
 /**
  * 公共方法
  */
+import cryptoFramework from '@ohos.security.cryptoFramework';
+import Constants from './Constants';
+import Logger from './Logger';
 export class CommonUtils {
 
   /**
@@ -24,6 +27,43 @@ export class CommonUtils {
    */
   public checkIsEmpty(str: string): boolean {
     return!str || str.trim().length == 0
+  }
+
+  /*
+   * md5加密
+   */
+  public async getMd5String(content: string): Promise<string> {
+    let md5 = cryptoFramework.createMd("MD5");
+    md5.update({ data: this.stringToUnit8Array(content) });
+
+    return new Promise((resolve, reject) => {
+      md5.digest((_err1, mdOutput) => {
+        console.log("[Promise]: MD result: " + mdOutput.data);
+        const hexString = this.uint8ArrayToHexString(mdOutput.data);
+        const md5String = hexString.toLowerCase().substring(0, 32);
+        resolve(md5String);
+        Logger.debug(Constants.TAG, `md5String  is ${md5String}`)
+      });
+    });
+  }
+
+  private uint8ArrayToHexString(uint8Array: Uint8Array): string {
+    let hexString = '';
+    for (let i = 0; i < uint8Array.length; i++) {
+      let hex = (uint8Array[i] & 0xff).toString(16);
+      hex = hex.length === 1 ? '0' + hex : hex;
+      hexString += hex;
+    }
+    return hexString;
+  }
+
+  private stringToUnit8Array(str: string): Uint8Array {
+    var arr = [];
+    for (var i = 0, j = str.length; i < j; ++i) {
+      arr.push(str.charCodeAt(i));
+    }
+    var tmpUnit8Array = new Uint8Array(arr);
+    return tmpUnit8Array;
   }
 
 }

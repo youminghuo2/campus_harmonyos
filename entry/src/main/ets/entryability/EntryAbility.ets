@@ -2,7 +2,10 @@
 import UIAbility from '@ohos.app.ability.UIAbility';
 import hilog from '@ohos.hilog';
 import window from '@ohos.window';
+import CommonUtils from '../common/CommonUtils'
+import Constants from '../common/Constants';
 import { PreferencesUtil } from '../common/PreferencesUtil';
+import SpKey from '../common/SpKey';
 
 export default class EntryAbility extends UIAbility {
   onCreate(want, launchParam) {
@@ -16,6 +19,15 @@ export default class EntryAbility extends UIAbility {
   async onWindowStageCreate(windowStage: window.WindowStage) {
     // Main window is created, set main page for this ability
     await PreferencesUtil.createPreferences(this.context)
+
+    PreferencesUtil.get(SpKey.BASE_URL).then((value:string)=>{
+      let base_url=value
+      if (CommonUtils.checkIsEmpty(base_url)) {
+        base_url=Constants.BASE_URL
+        PreferencesUtil.put(SpKey.BASE_URL,base_url)
+      }
+    })
+
     hilog.info(0x0000, 'testTag', '%{public}s', 'Ability onWindowStageCreate');
 
     windowStage.loadContent('pages/LoginHome', (err, data) => {
