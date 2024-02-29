@@ -6,8 +6,7 @@ import bundleManager from '@ohos.bundle.bundleManager';
 import Constants from '../common/Constants';
 import deviceInfo from '@ohos.deviceInfo';
 import OneBtnDialog from '../frame/dialog/OneBtnDialog';
-
-
+import router from '@ohos.router';
 
 @Entry
 @Component
@@ -21,22 +20,22 @@ struct LoginHome {
   @State mode: string = "psd"
   //checkbox是否勾选
   @State privacy_checkOn: boolean = false
-
-  private psd_wrongText='账号或密码错误，请重新输入'
-  private privacy_Text='请先勾选同意下方协议'
-
-
-  psdWrongController:CustomDialogController=new CustomDialogController({
-    builder:OneBtnDialog({
-      content:this.privacy_Text,
-      positive:()=>{this.psdWrongController.close()}
+  private psd_wrongText = '账号或密码错误，请重新输入'
+  private privacy_Text = '请先勾选同意下方协议'
+  psdWrongController: CustomDialogController = new CustomDialogController({
+    builder: OneBtnDialog({
+      content: this.privacy_Text,
+      positive: () => {
+        this.psdWrongController.close()
+      }
     })
   })
-
-  privacyController:CustomDialogController=new CustomDialogController({
-    builder:OneBtnDialog({
-      content:this.psd_wrongText,
-      positive:()=>{this.privacyController.close()}
+  privacyController: CustomDialogController = new CustomDialogController({
+    builder: OneBtnDialog({
+      content: this.psd_wrongText,
+      positive: () => {
+        this.privacyController.close()
+      }
     })
   })
 
@@ -180,32 +179,32 @@ struct LoginHome {
             if (this.privacy_checkOn) {
 
               let map = new Map<string, string>()
-              map.set("username",this.accountText)
-              map.set("encryptPwd",await CommonUtils.getMd5String(this.psdText))
-              map.set("clientType","ANDROID")
-              map.set("operatingSystem",deviceInfo.osFullName)
-              map.set("mobileType",deviceInfo.productModel)
-              map.set("mobileBrand","HUAWEI")
+              map.set("username", this.accountText)
+              map.set("encryptPwd", await CommonUtils.getMd5String(this.psdText))
+              map.set("clientType", "ANDROID")
+              map.set("operatingSystem", deviceInfo.osFullName)
+              map.set("mobileType", deviceInfo.productModel)
+              map.set("mobileBrand", "HUAWEI")
 
               let bundleFlags = bundleManager.BundleFlag.GET_BUNDLE_INFO_DEFAULT
 
               try {
                 bundleManager.getBundleInfoForSelf(bundleFlags).then((data) => {
                   Logger.debug(Constants.TAG, "getBundleInfoForSelf success：" + JSON.stringify(data))
-                  map.set("clientVersion",data.versionName)
+                  map.set("clientVersion", data.versionName)
 
                   // map.forEach((value,key)=>{
                   //   Logger.debug(Constants.TAG,"打印的map为:"+key+":"+value)
                   // })
-                  getLoginPsdList(map).then((data)=>{
-                     switch (data.code){
-                       case Constants.SUCCESS:
-                         this.psdWrongController.open()
-                       break;
-                       case Constants.FAILURE:
+                  getLoginPsdList(map).then((data) => {
+                    switch (data.code) {
+                      case Constants.SUCCESS:
+                        this.psdWrongController.open()
+                        break;
+                      case Constants.FAILURE:
 
-                       break;
-                     }
+                        break;
+                    }
 
                   })
                 }).catch(err => {
@@ -215,8 +214,8 @@ struct LoginHome {
                 Logger.error(Constants.TAG, "getBundleInfoForSelf failed: %{public}s" + err.message)
               }
 
-            }else{
-           this.privacyController.open()
+            } else {
+              this.privacyController.open()
             }
           }
         })
@@ -228,7 +227,7 @@ struct LoginHome {
         top: '15vp'
       }).justifyContent(FlexAlign.SpaceBetween)
 
-
+      //隐私政策，用户协议
       Row() {
         Toggle({
           type: ToggleType.Checkbox, isOn: false
@@ -238,9 +237,37 @@ struct LoginHome {
           }).width(12).height(12)
 
         Text($r('app.string.agree_privacy')).fontSize('11fp').fontColor($r('app.color.color_949494'))
-        Text($r('app.string.user_agree')).fontSize('11fp').fontColor($r('app.color.color_17B9C5'))
+        Text($r('app.string.user_agree')).fontSize('11fp').fontColor($r('app.color.color_17B9C5')).onClick(() => {
+          router.pushUrl({
+            url: 'pages/WebView',
+            params: {
+              url: 'https://www.jyjyapp.com/terms/agreement.html',
+              title: $r('app.string.user_agree')
+            }
+          }), router.RouterMode.Standard, (err => {
+            if (err) {
+              Logger.error(Constants.TAG, `agree_privacy LoginHome push to Webview is failed,code is ${err.code},message is ${err.message}`);
+              return;
+            }
+            Logger.debug(Constants.TAG, `agree_privacy LoginHome push to Webview is success`)
+          });
+        })
         Text($r('app.string.and')).fontSize('11fp').fontColor($r('app.color.color_949494'))
-        Text($r('app.string.privacy_policy')).fontSize('11fp').fontColor($r('app.color.color_17B9C5'))
+        Text($r('app.string.privacy_policy')).fontSize('11fp').fontColor($r('app.color.color_17B9C5')).onClick(()=>{
+          router.pushUrl({
+            url: 'pages/WebView',
+            params: {
+              url: 'https://www.jyjyapp.com/terms/privacy.html',
+              title: $r('app.string.privacy_policy')
+            }
+          }), router.RouterMode.Standard, (err => {
+            if (err) {
+              Logger.error(Constants.TAG, `privacy LoginHome push to Webview is failed,code is ${err.code},message is ${err.message}`);
+              return;
+            }
+            Logger.debug(Constants.TAG, `privacy LoginHome push to Webview is success`)
+          });
+        })
 
       }.width('100%').margin({
         top: '10vp'
@@ -258,7 +285,6 @@ struct LoginHome {
     .justifyContent(FlexAlign.Start)
 
   }
-
 }
 
 

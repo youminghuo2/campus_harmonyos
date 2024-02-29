@@ -68,5 +68,11 @@
       "name": "psd_wrong",
       "value": "账号或密码错误，请重新输入"
     }
-  ]
+  ,{
+      "name": "a_desc",
+      "value": "description"
+    },{
+      "name": "a_label",
+      "value": "label"
+    }]
 }
