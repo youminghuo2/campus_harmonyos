@@ -3,4 +3,8 @@
  */
 export default class SpKey{
   static readonly BASE_URL="base_url";
+
+  static readonly token="token"
+  static readonly refresh_token="refresh_token"
+
 }

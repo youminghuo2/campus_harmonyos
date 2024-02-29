@@ -1,6 +1,6 @@
 export default class Response{
-  code:number
-  message:string
+  code:string
+  msg:string
   data:any
   bcode:string
 }

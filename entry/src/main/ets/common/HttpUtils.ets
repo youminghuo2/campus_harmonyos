@@ -3,6 +3,7 @@
  * data如果是GET形式，data此时等同于以Map<String,Object>形式传递
  */
 import http from '@ohos.net.http';
+import promptAction from '@ohos.promptAction';
 import Response from '../network/entity/Response';
 
 import CommonUtils from './CommonUtils';
@@ -17,10 +18,22 @@ export async function request(url: string, method: http.RequestMethod, data?: an
   let httpRequest = http.createHttp()
 
   if (method === http.RequestMethod.GET && data instanceof Map) {
-    const urlParams = Object.keys(data).map(key => `${key}=${data[key]}`).join('&');
-    url = url.includes('?') ? `${url}${urlParams}` : `${url}?${urlParams}`;
+
+    let urlParams = ""
+    Logger.debug(Constants.TAG, `---------------------------------------------------------------------------------------------------`)
+    for (let [key, value] of data) {
+      urlParams += `${key}=${value}&`;
+      Logger.debug(Constants.TAG, `对应的参数 is ${"key: "+key +" value: " +value}`)
+    }
+    Logger.debug(Constants.TAG, `---------------------------------------------------------------------------------------------------`)
+    if (urlParams.length > 0) {
+      urlParams = urlParams.substring(0, urlParams.length - 1);
+    }
+    Logger.debug(Constants.TAG, `urlParams 请求的参数完整链接 is ${urlParams}`)
+    url = url.includes('?') ? `${url}&${urlParams}` : `${url}?${urlParams}`;
   }
-  Logger.debug(Constants.TAG, `base url 请求完整地址 is ${base_url + url}`)
+
+  Logger.debug(Constants.TAG, `base url 请求地址 is ${base_url + url}`)
 
   let responseResult = httpRequest.request(base_url + url, {
     method: method,
@@ -30,29 +43,42 @@ export async function request(url: string, method: http.RequestMethod, data?: an
   let response = new Response();
   Logger.debug(Constants.TAG, `response url is ${url}`)
   // 处理数据，并返回
-    return responseResult.then((value: http.HttpResponse) => {
+  return responseResult.then((value: http.HttpResponse) => {
 
-    Logger.debug(Constants.TAG, `response header is ${value.header}`)
+    Logger.debug(Constants.TAG, `response header is ${JSON.stringify(value.header)}`)
     Logger.debug(Constants.TAG, `response responseCode is ${value.responseCode}`)
-    Logger.debug(Constants.TAG, `response resultType is ${value.resultType}`)
     if (value.responseCode === 200) {
-      // 获取返回数据,将返回的json数据解析成事先预定好的响应格式
-      // 这里建议和后端的保持一致
       let res: Response = JSON.parse(`${value.result}`);
       response.data = res.data;
       response.code = res.code;
-      response.message = res.message;
+      response.msg = res.msg;
       tagLog(response)
+      if (response.code == Constants.SUCCESS) {
+
+        PreferencesUtil.get(SpKey.token).then((headerData: string) => {
+          if (CommonUtils.checkIsEmpty(headerData)) {
+            saveTokenAndRefresh(JSON.stringify(value.header))
+          }
+        })
+
+        promptAction.showToast({ message: response.msg })
+        return response;
+      }
+      if (response.code == Constants.FAILURE) {
+        promptAction.showToast({ message: response.msg })
+        return response;
+      }
     } else {
       tagLog(response)
-      response.message = '请求错误';
-      response.code = 400;
+      // response.msg = '请求错误';
+      // response.code = 400;
     }
     return response;
   }).catch(() => {
     tagLog(response)
-    response.message = '请求错误';
-    response.code = 400;
+    // response.msg = '请求错误';
+    // response.code = 400;
+    promptAction.showToast({ message: response.msg })
     return response;
   });
 
@@ -60,7 +86,7 @@ export async function request(url: string, method: http.RequestMethod, data?: an
 
 function tagLog(response: Response) {
   Logger.debug(Constants.TAG, `response code is ${response.code}`)
-  Logger.debug(Constants.TAG, `response message is ${response.message}`)
+  Logger.debug(Constants.TAG, `response msg is ${response.msg}`)
   Logger.debug(Constants.TAG, `response data is ${JSON.stringify(response.data)}`)
 
 }
@@ -78,6 +104,17 @@ function getBase(): Promise<string> {
       reject(error);
     });
   });
+}
+
+function saveTokenAndRefresh(data:string){
+  let obj=JSON.parse(data.toString());
+
+  Logger.debug(Constants.TAG, `---------------------------------------------------------------------------------------------------`)
+  Logger.debug(Constants.TAG, `saveTokenAndRefresh token is ${ obj['auth-jwt']}`)
+  Logger.debug(Constants.TAG, `saveTokenAndRefresh refreshToken is ${ obj['auth-jwt']}`)
+  PreferencesUtil.put(SpKey.token,obj['auth-jwt'])
+  PreferencesUtil.put(SpKey.refresh_token,obj['auth-jwt-refresh'])
+
 }
 
 

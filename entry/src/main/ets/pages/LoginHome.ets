@@ -2,6 +2,10 @@
 import CommonUtils from '../common/CommonUtils'
 import Logger from '../common/Logger'
 import { getLoginPsdList } from '../network/api/basicdataApi'
+import bundleManager from '@ohos.bundle.bundleManager';
+import Constants from '../common/Constants';
+import deviceInfo from '@ohos.deviceInfo';
+import OneBtnDialog from '../frame/dialog/OneBtnDialog';
 
 
 
@@ -10,11 +14,31 @@ import { getLoginPsdList } from '../network/api/basicdataApi'
 struct LoginHome {
   @State message: string = 'Hello World'
   @State checked: string = "psd"
-  @State isLogin: Boolean = false
+  @State isLogin: boolean = false
   @State accountText: string = ""
   @State psdText: string = ""
   //当前的模式是账号密码，或者短信
   @State mode: string = "psd"
+  //checkbox是否勾选
+  @State privacy_checkOn: boolean = false
+
+  private psd_wrongText='账号或密码错误，请重新输入'
+  private privacy_Text='请先勾选同意下方协议'
+
+
+  psdWrongController:CustomDialogController=new CustomDialogController({
+    builder:OneBtnDialog({
+      content:this.privacy_Text,
+      positive:()=>{this.psdWrongController.close()}
+    })
+  })
+
+  privacyController:CustomDialogController=new CustomDialogController({
+    builder:OneBtnDialog({
+      content:this.psd_wrongText,
+      positive:()=>{this.privacyController.close()}
+    })
+  })
 
   build() {
     Column() {
@@ -149,16 +173,53 @@ struct LoginHome {
         .height('50vp')
         .opacity(
           // 0.5
-          CommonUtils.checkIsEmptyLogin(this.accountText, this.psdText) ? 1 : 0.5
-        ).onClick(async ()=>{
-         let map=new Map<string,string>()
-         map["username"]="33776311585"
-         // map["encryptPwd"]="43181cec2a36fb47203b17eb4405acfc"
-        map["encryptPwd"]=  await CommonUtils.getMd5String("qqqq!1111")
-         map["clientType"]="ANDROID"
-         map["clientVersion"]="2.7.18"
-        getLoginPsdList(map)
-      })
+          CommonUtils.checkIsNotEmptyLogin(this.accountText, this.psdText) ? 1 : 0.5
+        )
+        .onClick(async () => {
+          if (CommonUtils.checkIsNotEmptyLogin(this.accountText, this.psdText)) {
+            if (this.privacy_checkOn) {
+
+              let map = new Map<string, string>()
+              map.set("username",this.accountText)
+              map.set("encryptPwd",await CommonUtils.getMd5String(this.psdText))
+              map.set("clientType","ANDROID")
+              map.set("operatingSystem",deviceInfo.osFullName)
+              map.set("mobileType",deviceInfo.productModel)
+              map.set("mobileBrand","HUAWEI")
+
+              let bundleFlags = bundleManager.BundleFlag.GET_BUNDLE_INFO_DEFAULT
+
+              try {
+                bundleManager.getBundleInfoForSelf(bundleFlags).then((data) => {
+                  Logger.debug(Constants.TAG, "getBundleInfoForSelf success：" + JSON.stringify(data))
+                  map.set("clientVersion",data.versionName)
+
+                  // map.forEach((value,key)=>{
+                  //   Logger.debug(Constants.TAG,"打印的map为:"+key+":"+value)
+                  // })
+                  getLoginPsdList(map).then((data)=>{
+                     switch (data.code){
+                       case Constants.SUCCESS:
+                         this.psdWrongController.open()
+                       break;
+                       case Constants.FAILURE:
+
+                       break;
+                     }
+
+                  })
+                }).catch(err => {
+                  Logger.info(Constants.TAG, "getBundleInfoForSelf failed. Cause: %{public}s" + err.message)
+                })
+              } catch (err) {
+                Logger.error(Constants.TAG, "getBundleInfoForSelf failed: %{public}s" + err.message)
+              }
+
+            }else{
+           this.privacyController.open()
+            }
+          }
+        })
 
       Row() {
         Text('注册').fontSize('13fp').fontColor($r('app.color.color_646464'))
@@ -172,6 +233,9 @@ struct LoginHome {
         Toggle({
           type: ToggleType.Checkbox, isOn: false
         }).selectedColor($r('app.color.color_17B9C5'))
+          .onChange((isOn: boolean) => {
+            this.privacy_checkOn = isOn
+          }).width(12).height(12)
 
         Text($r('app.string.agree_privacy')).fontSize('11fp').fontColor($r('app.color.color_949494'))
         Text($r('app.string.user_agree')).fontSize('11fp').fontColor($r('app.color.color_17B9C5'))
@@ -179,7 +243,7 @@ struct LoginHome {
         Text($r('app.string.privacy_policy')).fontSize('11fp').fontColor($r('app.color.color_17B9C5'))
 
       }.width('100%').margin({
-        top: '15vp'
+        top: '10vp'
       }).justifyContent(FlexAlign.Start)
 
     }
@@ -194,7 +258,16 @@ struct LoginHome {
     .justifyContent(FlexAlign.Start)
 
   }
+
 }
+
+
+
+
+
+
+
+
 
 
 

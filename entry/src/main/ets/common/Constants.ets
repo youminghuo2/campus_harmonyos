@@ -9,4 +9,8 @@ export default class Constants{
   static readonly TAG: string = "tag is campus";
 
   static readonly BASE_URL="http://101.133.155.220:28080/";
+
+  static readonly FAILURE="FAILURE"
+
+  static readonly SUCCESS="SUCCESS";
 }

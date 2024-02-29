@@ -10,7 +10,7 @@
     },
     {
       "name": "EntryAbility_label",
-      "value": "label"
+      "value": "江阴智慧云校"
     },
     {
       "name": "LoginHome_title",
@@ -59,6 +59,14 @@
     {
       "name": "and",
       "value": "和"
+    },
+    {
+      "name": "positive",
+      "value": "确定"
+    },
+    {
+      "name": "psd_wrong",
+      "value": "账号或密码错误，请重新输入"
     }
   ]
 }

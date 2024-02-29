@@ -88,7 +88,7 @@ export class PreferencesUtil {
    * 获取preference
    */
   public static async get(key: string) {
-    let value: unknown;
+    let value: null;
     if (!preference) {
       await this.createPreferences(getContext(this));
     }
