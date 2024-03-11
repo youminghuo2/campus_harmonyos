@@ -7,6 +7,8 @@ import Constants from '../common/Constants';
 import deviceInfo from '@ohos.deviceInfo';
 import OneBtnDialog from '../frame/dialog/OneBtnDialog';
 import router from '@ohos.router';
+import { PreferencesUtil } from '../common/PreferencesUtil';
+import SpKey from '../common/SpKey';
 
 @Entry
 @Component
@@ -24,7 +26,7 @@ struct LoginHome {
   private privacy_Text = '请先勾选同意下方协议'
   psdWrongController: CustomDialogController = new CustomDialogController({
     builder: OneBtnDialog({
-      content: this.privacy_Text,
+      content: this.psd_wrongText,
       positive: () => {
         this.psdWrongController.close()
       }
@@ -32,12 +34,17 @@ struct LoginHome {
   })
   privacyController: CustomDialogController = new CustomDialogController({
     builder: OneBtnDialog({
-      content: this.psd_wrongText,
+      content: this.privacy_Text,
       positive: () => {
         this.privacyController.close()
       }
     })
   })
+
+  async aboutToAppear(){
+    let data= await PreferencesUtil.getEntity(SpKey.splashImgList)
+    Logger.debug(Constants.TAG, `轮播图s data`+JSON.stringify(data))
+  }
 
   build() {
     Column() {
@@ -191,6 +198,7 @@ struct LoginHome {
               try {
                 bundleManager.getBundleInfoForSelf(bundleFlags).then((data) => {
                   Logger.debug(Constants.TAG, "getBundleInfoForSelf success：" + JSON.stringify(data))
+
                   map.set("clientVersion", data.versionName)
 
                   // map.forEach((value,key)=>{
@@ -199,10 +207,18 @@ struct LoginHome {
                   getLoginPsdList(map).then((data) => {
                     switch (data.code) {
                       case Constants.SUCCESS:
-                        this.psdWrongController.open()
+                       router.replaceUrl({
+                         url:'pages/MainPage',
+                       }),router.RouterMode.Standard,(err)=>{
+                         if (err) {
+                           Logger.error(Constants.TAG, `LoginHome push to MainPage is failed,code is ${err.code},message is ${err.message}`);
+                           return;
+                         }
+                         Logger.debug(Constants.TAG, ` LoginHome push to MainPage is success`)
+                       }
                         break;
                       case Constants.FAILURE:
-
+                        this.psdWrongController.open()
                         break;
                     }
 

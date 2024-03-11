@@ -13,4 +13,6 @@ export default class Constants{
   static readonly FAILURE="FAILURE"
 
   static readonly SUCCESS="SUCCESS";
+
+  static readonly APP_SPLASHSCREEN="APP_SPLASHSCREEN"
 }

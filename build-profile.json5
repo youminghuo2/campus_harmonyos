@@ -6,9 +6,9 @@
         "type": "HarmonyOS",
         "material": {
           "certpath": "C:\\Users\\zhuchenyi\\.ohos\\config\\auto_debug_campus_harmonyos_com.example.campus_harmonyos_890086000300112160.cer",
-          "storePassword": "0000001B332F5780488FB43AE272320368D786A2A8B3EDB98EA3B32EF7B031BD39372F0516B370B012D8AD",
+          "storePassword": "0000001B7B3780E6B21650C04823BFAF1990C96B87289CCF939363E2C14B3F7FFF9099067A7769CE4996C1",
           "keyAlias": "debugKey",
-          "keyPassword": "0000001B96644E1D40284D4963B04CDB800D1699A383F536AB971934CA87B4313393D60F42A738810B0750",
+          "keyPassword": "0000001BCA03E37BB73A58BDBBF5210F4DF81899E045F7F30C6E7BAF4AB38A5E57784E4F2E4FF21BE95B14",
           "profile": "C:\\Users\\zhuchenyi\\.ohos\\config\\auto_debug_campus_harmonyos_com.example.campus_harmonyos_890086000300112160.p7b",
           "signAlg": "SHA256withECDSA",
           "storeFile": "C:\\Users\\zhuchenyi\\.ohos\\config\\auto_debug_campus_harmonyos_com.example.campus_harmonyos_890086000300112160.p12"

@@ -114,7 +114,14 @@ export class PreferencesUtil {
     }catch (err){
       Logger.error(Constants.TAG,`Failed to get value,Cause:${err}`)
     }
-    return JSON.parse(value)
+    let obj
+    try {
+      obj = JSON.parse(value);
+      console.log(obj);
+    } catch (err) {
+      console.log('Value is not a valid JSON string:', err);
+    }
+    return obj
   }
 
   /**

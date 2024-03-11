@@ -5,8 +5,6 @@ import TitleBar from '../frame/ui/Titlebar';
 @Entry
 @Component
 export default struct WebView {
-  // @State url:string=router.getParams()?.['url']
-  // @State title:string=router.getParams()?.['title']
   @State params: object = router.getParams()
   @State url: string = ""
   @State title: string = ""

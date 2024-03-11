@@ -1,4 +1,9 @@
 import router from '@ohos.router'
+
+/**
+ *通用标题栏
+ */
+
 @Component
 export default struct TitleBar{
    title:string=''

@@ -12,7 +12,7 @@ import Logger from './Logger';
 import { PreferencesUtil } from './PreferencesUtil';
 import SpKey from './SpKey';
 
-export async function request(url: string, method: http.RequestMethod, data?: any): Promise<Response> {
+export async function request(url: string, method: http.RequestMethod, data?: any,header?:any): Promise<Response> {
 
   let base_url = await getBase()
   let httpRequest = http.createHttp()
@@ -25,29 +25,34 @@ export async function request(url: string, method: http.RequestMethod, data?: an
       urlParams += `${key}=${value}&`;
       Logger.debug(Constants.TAG, `对应的参数 is ${"key: "+key +" value: " +value}`)
     }
-    Logger.debug(Constants.TAG, `---------------------------------------------------------------------------------------------------`)
     if (urlParams.length > 0) {
       urlParams = urlParams.substring(0, urlParams.length - 1);
     }
-    Logger.debug(Constants.TAG, `urlParams 请求的参数完整链接 is ${urlParams}`)
+    Logger.debug(Constants.TAG, `urlParams 请求的参数完整参数 is ${urlParams}`)
+    Logger.debug(Constants.TAG, `---------------------------------------------------------------------------------------------------`)
+
     url = url.includes('?') ? `${url}&${urlParams}` : `${url}?${urlParams}`;
   }
 
   Logger.debug(Constants.TAG, `base url 请求地址 is ${base_url + url}`)
 
+  // let a=header instanceof Map && header.size > 0 ? header:undefined;
+
   let responseResult = httpRequest.request(base_url + url, {
+    header: header instanceof Map && header.size>0 ? header:undefined,
     method: method,
     extraData: method == http.RequestMethod.GET ? undefined : JSON.stringify(data)
   })
 
   let response = new Response();
-  Logger.debug(Constants.TAG, `response url is ${url}`)
+
   // 处理数据，并返回
   return responseResult.then((value: http.HttpResponse) => {
-
+    Logger.debug(Constants.TAG, `---------------------------------------------------------------------------------------------------`)
     Logger.debug(Constants.TAG, `response header is ${JSON.stringify(value.header)}`)
     Logger.debug(Constants.TAG, `response responseCode is ${value.responseCode}`)
     if (value.responseCode === 200) {
+
       let res: Response = JSON.parse(`${value.result}`);
       response.data = res.data;
       response.code = res.code;
@@ -61,10 +66,10 @@ export async function request(url: string, method: http.RequestMethod, data?: an
           }
         })
 
-        promptAction.showToast({ message: response.msg })
+        // promptAction.showToast({ message: response.msg })
+        Logger.debug(Constants.TAG, `接口结果:${response.msg}`)
         return response;
-      }
-      if (response.code == Constants.FAILURE) {
+      }if (response.code == Constants.FAILURE) {
         promptAction.showToast({ message: response.msg })
         return response;
       }
@@ -81,7 +86,7 @@ export async function request(url: string, method: http.RequestMethod, data?: an
     promptAction.showToast({ message: response.msg })
     return response;
   });
-
+  Logger.debug(Constants.TAG, `---------------------------------------------------------------------------------------------------`)
 }
 
 function tagLog(response: Response) {

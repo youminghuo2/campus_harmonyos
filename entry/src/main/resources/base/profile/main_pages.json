@@ -2,6 +2,8 @@
   "src": [
     "pages/Index",
     "pages/LoginHome",
-    "pages/WebView"
+    "pages/WebView",
+    "pages/MainPage",
+    "pages/SplashPage"
   ]
 }

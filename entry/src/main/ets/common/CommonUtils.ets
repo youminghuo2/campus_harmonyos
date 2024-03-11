@@ -4,6 +4,9 @@
 import cryptoFramework from '@ohos.security.cryptoFramework';
 import Constants from './Constants';
 import Logger from './Logger';
+import { PreferencesUtil } from './PreferencesUtil';
+import SpKey from './SpKey';
+
 export class CommonUtils {
 
   /**
@@ -19,7 +22,7 @@ export class CommonUtils {
    * 如果两个都不为空，则返回true，否则返回false
    */
   public checkIsNotEmptyLogin(account: string, psd: string): boolean {
-      return!this.checkIsEmpty(account) && !this.checkIsEmpty(psd)
+    return!this.checkIsEmpty(account) && !this.checkIsEmpty(psd)
   }
 
   /**
@@ -66,6 +69,27 @@ export class CommonUtils {
     return tmpUnit8Array;
   }
 
+  //获取token和schoolId
+  public  async getTokenOrSchoolId():Promise<Map<string, string>> {
+    let map = new Map<string, string>()
+    await Promise.all([
+    PreferencesUtil.get(SpKey.token).then((data: string) => {
+      if (data!=null) {
+        map.set("Auth-JWT", data)
+      }
+    }),
+    PreferencesUtil.get(SpKey.schoolId).then((data: string) => {
+      if(data!=null){
+        map.set("aware_organization_uid", data)
+      }
+    })
+    ]);
+    map.forEach((value,key)=>{
+      Logger.debug(Constants.TAG,"打印的map getTokenOrSchoolId 为:"+key+":"+value)
+    })
+    return map;
+
+  }
 }
 
 export default new CommonUtils();
