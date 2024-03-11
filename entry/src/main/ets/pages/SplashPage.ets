@@ -2,50 +2,60 @@
  * 启动页
  */
 import dataPreferences from '@ohos.data.preferences';
-import common from '@ohos.app.ability.common';
+import JumpUtils from '../common/JumpUtils';
+
 import { PreferencesUtil } from '../common/PreferencesUtil';
 
 import SpKey from '../common/SpKey';
 import { Splash } from '../frame/ui/Splash';
 import { SplashEntity } from '../network/entity/SplashEntity';
-import Constants from '../common/Constants';
-
 
 @Entry
 @Component
-export  struct  SplashPage{
-  @State splashList :string[]=[]
+export struct SplashPage {
+  @State splashList: string[] = []
   @State preference: dataPreferences.Preferences = null;
+  private swiperController: SwiperController = new SwiperController()
 
-  async getPreference() {
-    try {
-      // 异步转同步使用
-      this.preference = await PreferencesUtil.getPreferences()
-      console.info(Constants.TAG, `订阅首选项变化`);
-      this.preference.on('change',(data) => {
-        console.info(Constants.TAG, `订阅 key : ${JSON.stringify(data)}`);
-      })
-    } catch (e) {
-      console.info(Constants.TAG, `Failed : ${JSON.stringify(e)}`);
-    }
+  async aboutToAppear() {
+    this.splashList = await PreferencesUtil.getEntity(SpKey.splashImgList);
+
   }
 
-  aboutToAppear() {
-    PreferencesUtil.getEntity(SpKey.splashImgList).then((value:string[])=>{
-      this.splashList=value
-    })
-    this.getPreference()
-  }
+  build() {
+    Column() {
+      if (this.splashList.length > 1) {
+        Swiper(this.swiperController) {
+          ForEach(this.splashList, (item: string, index: number) => {
+            if (index == this.splashList.length - 1) {
+              Stack({ alignContent: Alignment.Bottom }) {
+                this.splashImage(item)
+                Button('进入').margin({
+                  bottom: '50vp'
+                }).fontSize(16)
+                  .fontColor(Color.White)
+                  .backgroundColor($r('app.color.color_17B9C5'))
+                  .width('100vp').onClick(()=>{
+                 JumpUtils.jumpToLoginHome()
+                })
+              }
+            } else {
+              this.splashImage(item)
+            }
 
-    build(){
-    Column(){
-      if (this.splashList.length>1){
-
-      }else {
-        Splash({mSplash:new SplashEntity(3,$r('app.media.splash')),dataList:$splashList})
+          }, (item: string) => item)
+        }.loop(false)
+      } else {
+        Splash({ mSplash: new SplashEntity(3, $r('app.media.splash')), dataList: $splashList })
       }
     }.width('100%')
   }
 
-
+  @Builder splashImage(item: string) {
+    Image(item)
+      .width('100%')
+      .height('100%')
+  }
 }
+
+

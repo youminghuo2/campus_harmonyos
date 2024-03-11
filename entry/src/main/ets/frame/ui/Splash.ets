@@ -1,24 +1,21 @@
 /**
  * 启动页
  */
-import ArrayList from '@ohos.util.ArrayList';
-import router from '@ohos.router';
 import Constants from '../../common/Constants';
-import Logger from '../../common/Logger';
 
 import { getBylication } from '../../network/api/portalApi';
 
 import { SplashEntity } from '../../network/entity/SplashEntity';
-
-import { SplashBean } from '../../network/entity/SplashBean';
 import { PreferencesUtil } from '../../common/PreferencesUtil';
 import SpKey from '../../common/SpKey';
+import JumpUtils from '../../common/JumpUtils';
 
 @Component
 export struct Splash {
   @State mSplash: SplashEntity = new SplashEntity(3);
 
   @Link dataList :string[]
+
 
   aboutToAppear() {
     let map = new Map<string, string>();
@@ -35,26 +32,22 @@ export struct Splash {
           PreferencesUtil.put(SpKey.splashImgList, JSON.stringify(splashImgList))
           break;
         case Constants.FAILURE:
-          Logger.debug(Constants.TAG, `轮播图 data is ` + JSON.stringify(data.data))
           break;
       }
     })
 
-    let skipWait = setInterval(() => {
+     let skipWait = setInterval(() => {
       this.mSplash.timer--;
       if (this.mSplash.timer === 0) {
         clearInterval(skipWait);
-        this.jumpToRoute();
+        if (this.dataList.length<2) {
+          JumpUtils.jumpToLoginHome()
+        }
       }
     }, 1000)
-  }
-
-  jumpToRoute() {
-    router.replaceUrl({
-      url: 'pages/LoginHome'
-    });
 
   }
+
 
   build() {
     if (this.dataList.length==0 || this.dataList.length == 1) {
@@ -70,7 +63,7 @@ export struct Splash {
           .fontSize(12)
           .fontColor(Color.White)
           .onClick(() => {
-            this.jumpToRoute();
+            JumpUtils.jumpToLoginHome()
           })
       }.width('100%').height('100%')
 
