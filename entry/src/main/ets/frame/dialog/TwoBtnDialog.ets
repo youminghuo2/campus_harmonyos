@@ -1,5 +1,5 @@
 /**
- * 有2个按钮的弹窗，如取消，确定
+ * 只有一个确定按钮的弹窗
  */
 
 @Extend(Text) function fontText(fontSize: number) {
@@ -22,12 +22,15 @@
 }
 
 @CustomDialog
-export default struct OneBtnDialog {
+export default struct TwoBtnDialog {
   content = ''
   positiveText = '确定'
   positiveColor = $r('app.color.color_17B9C5')
+  negativeText='取消'
+  negativeColor=$r('app.color.color_17B9C5')
   controller: CustomDialogController
   positive: () => void
+  negative:()=> void
 
   @Builder TipTextStyle(tip: string, fontSize: number) {
     Text(tip)
@@ -41,14 +44,24 @@ export default struct OneBtnDialog {
       Divider().strokeWidth('1vp').color($r('app.color.line_color')).margin({
         top:'15vp'
       })
-      Flex({ justifyContent: FlexAlign.Center }) {
+      Flex({justifyContent:FlexAlign.SpaceBetween}){
+
+        Text(this.negativeText)
+          .funBtn(this.negativeColor)
+          .onClick(()=>{
+            this.negative()
+          })
+
         Text(this.positiveText)
           .funBtn(this.positiveColor)
-          .onClick(() => {
+          .onClick(()=>{
             this.positive()
           })
-      }.margin({top:20,bottom:15,left:15,right:15})
+      }
     }
   }
+
+
+
 }
 

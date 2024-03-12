@@ -1,4 +1,3 @@
-// @ts-ignore
 import CommonUtils from '../common/CommonUtils'
 import Logger from '../common/Logger'
 import { getLoginPsdList } from '../network/api/basicdataApi'
@@ -9,7 +8,11 @@ import OneBtnDialog from '../frame/dialog/OneBtnDialog';
 import router from '@ohos.router';
 import { PreferencesUtil } from '../common/PreferencesUtil';
 import SpKey from '../common/SpKey';
+import TwoBtnDialog from '../frame/dialog/TwoBtnDialog';
 
+/**
+ * 登录主界面
+ */
 @Entry
 @Component
 struct LoginHome {
@@ -22,8 +25,11 @@ struct LoginHome {
   @State mode: string = "psd"
   //checkbox是否勾选
   @State privacy_checkOn: boolean = false
+  private count: number = 0
+
+
+  //弹窗
   private psd_wrongText = '账号或密码错误，请重新输入'
-  private privacy_Text = '请先勾选同意下方协议'
   psdWrongController: CustomDialogController = new CustomDialogController({
     builder: OneBtnDialog({
       content: this.psd_wrongText,
@@ -32,6 +38,8 @@ struct LoginHome {
       }
     })
   })
+
+  private privacy_Text = '请先勾选同意下方协议'
   privacyController: CustomDialogController = new CustomDialogController({
     builder: OneBtnDialog({
       content: this.privacy_Text,
@@ -41,9 +49,22 @@ struct LoginHome {
     })
   })
 
-  async aboutToAppear(){
-    let data= await PreferencesUtil.getEntity(SpKey.splashImgList)
-    Logger.debug(Constants.TAG, `轮播图s data`+JSON.stringify(data))
+  private no_registerText='该手机号码未注册，请先注册'
+  noRegisterController:CustomDialogController=new CustomDialogController({
+      builder:TwoBtnDialog({
+        content: this.no_registerText,
+        positive: () => {
+          this.noRegisterController.close()
+        },
+        negative:()=>{
+         this. noRegisterController.close()
+        }
+      })
+  })
+
+  async aboutToAppear() {
+    let data = await PreferencesUtil.getEntity(SpKey.splashImgList)
+    Logger.debug(Constants.TAG, `轮播图s data` + JSON.stringify(data))
   }
 
   build() {
@@ -79,6 +100,7 @@ struct LoginHome {
             this.mode = 'psd'
             this.accountText = ''
             this.psdText = ''
+            this.count = 0
           }
         })
 
@@ -100,6 +122,7 @@ struct LoginHome {
             this.mode = 'sms'
             this.accountText = ''
             this.psdText = ''
+            this.count = 0
           }
         }).margin({
           left: '30vp'
@@ -207,18 +230,25 @@ struct LoginHome {
                   getLoginPsdList(map).then((data) => {
                     switch (data.code) {
                       case Constants.SUCCESS:
-                       router.replaceUrl({
-                         url:'pages/MainPage',
-                       }),router.RouterMode.Standard,(err)=>{
-                         if (err) {
-                           Logger.error(Constants.TAG, `LoginHome push to MainPage is failed,code is ${err.code},message is ${err.message}`);
-                           return;
-                         }
-                         Logger.debug(Constants.TAG, ` LoginHome push to MainPage is success`)
-                       }
+                        router.replaceUrl({
+                          url: 'pages/MainPage',
+                        }), router.RouterMode.Standard, (err) => {
+                          if (err) {
+                            Logger.error(Constants.TAG, `LoginHome push to MainPage is failed,code is ${err.code},message is ${err.message}`);
+                            return;
+                          }
+                          Logger.debug(Constants.TAG, ` LoginHome push to MainPage is success`)
+                        }
                         break;
                       case Constants.FAILURE:
                         this.psdWrongController.open()
+                        Logger.debug(Constants.TAG, ` LoginHome push to MainPage is failure` + JSON.stringify(data))
+                        let flag = data.data.flag
+                        if (flag == 2) {
+                          this.count++
+
+                        }
+
                         break;
                     }
 
@@ -269,7 +299,7 @@ struct LoginHome {
           });
         })
         Text($r('app.string.and')).fontSize('11fp').fontColor($r('app.color.color_949494'))
-        Text($r('app.string.privacy_policy')).fontSize('11fp').fontColor($r('app.color.color_17B9C5')).onClick(()=>{
+        Text($r('app.string.privacy_policy')).fontSize('11fp').fontColor($r('app.color.color_17B9C5')).onClick(() => {
           router.pushUrl({
             url: 'pages/WebView',
             params: {
