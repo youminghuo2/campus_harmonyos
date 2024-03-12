@@ -18,7 +18,7 @@ export class CommonUtils {
   }
 
   /**
-   * 判断账号密码是否为空
+   * 判断账号密码是否都不为空
    * 如果两个都不为空，则返回true，否则返回false
    */
   public checkIsNotEmptyLogin(account: string, psd: string): boolean {
@@ -90,6 +90,7 @@ export class CommonUtils {
     return map;
 
   }
+
 }
 
 export default new CommonUtils();

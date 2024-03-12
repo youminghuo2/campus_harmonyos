@@ -1,5 +1,5 @@
 /**
- * 只有一个确定按钮的弹窗
+ * 有2个按钮的弹窗
  */
 
 @Extend(Text) function fontText(fontSize: number) {
@@ -57,7 +57,7 @@ export default struct TwoBtnDialog {
           .onClick(()=>{
             this.positive()
           })
-      }
+      }.height('40vp')
     }
   }
 

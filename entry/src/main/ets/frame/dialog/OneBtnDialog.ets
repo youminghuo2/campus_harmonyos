@@ -1,5 +1,5 @@
 /**
- * 有2个按钮的弹窗，如取消，确定
+ * 有1个按钮的弹窗
  */
 
 @Extend(Text) function fontText(fontSize: number) {

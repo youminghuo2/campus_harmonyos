@@ -3,8 +3,8 @@ import CommonUtils from '../common/CommonUtils'
 
 import Constants from '../common/Constants'
 import Logger from '../common/Logger'
-import TitleBuilder from '../frame/ui/TitleBuilder'
-import { loginuInfo } from '../network/api/basicdataApi'
+import { getLoginInfo } from '../network/api/basicdataApi'
+
 import { getAppmodule } from '../network/api/portalApi'
 @Entry
 @Component
@@ -35,7 +35,7 @@ struct MainPage {
 
 async function getUserInfo(){
   let  header= await CommonUtils.getTokenOrSchoolId()
-  loginuInfo(header).then((response)=>{
+  getLoginInfo(header).then((response)=>{
     if (response.code==Constants.SUCCESS) {
       Logger.debug(Constants.TAG, "getUserInfo：" + JSON.stringify(response))
 

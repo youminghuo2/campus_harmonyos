@@ -1,6 +1,6 @@
 import CommonUtils from '../common/CommonUtils'
 import Logger from '../common/Logger'
-import { getLoginPsdList } from '../network/api/basicdataApi'
+
 import bundleManager from '@ohos.bundle.bundleManager';
 import Constants from '../common/Constants';
 import deviceInfo from '@ohos.deviceInfo';
@@ -9,6 +9,10 @@ import router from '@ohos.router';
 import { PreferencesUtil } from '../common/PreferencesUtil';
 import SpKey from '../common/SpKey';
 import TwoBtnDialog from '../frame/dialog/TwoBtnDialog';
+import promptAction from '@ohos.promptAction';
+import Loading from '../frame/ui/Loading';
+import { getLoginPsdList, getLoginSmsList, sendSmsCode } from '../network/api/basicdataApi';
+import JumpUtils from '../common/JumpUtils';
 
 /**
  * 登录主界面
@@ -26,6 +30,11 @@ struct LoginHome {
   //checkbox是否勾选
   @State privacy_checkOn: boolean = false
   private count: number = 0
+  @State isLoading: boolean = false
+
+  //是否显示获取验证码 or 几秒后获取
+  @State achieve_sms: boolean = true
+  @State timer: number = 60
 
 
   //弹窗
@@ -38,7 +47,6 @@ struct LoginHome {
       }
     })
   })
-
   private privacy_Text = '请先勾选同意下方协议'
   privacyController: CustomDialogController = new CustomDialogController({
     builder: OneBtnDialog({
@@ -48,18 +56,29 @@ struct LoginHome {
       }
     })
   })
-
-  private no_registerText='该手机号码未注册，请先注册'
-  noRegisterController:CustomDialogController=new CustomDialogController({
-      builder:TwoBtnDialog({
-        content: this.no_registerText,
-        positive: () => {
-          this.noRegisterController.close()
-        },
-        negative:()=>{
-         this. noRegisterController.close()
-        }
-      })
+  private no_registerText = '该手机号码未注册，请先注册'
+  noRegisterController: CustomDialogController = new CustomDialogController({
+    builder: TwoBtnDialog({
+      content: this.no_registerText,
+      positive: () => {
+        this.noRegisterController.close()
+      },
+      negative: () => {
+        this.noRegisterController.close()
+      }
+    })
+  })
+  private psd_resetText = '密码错误，是否重置密码'
+  psdResetController: CustomDialogController = new CustomDialogController({
+    builder: TwoBtnDialog({
+      content: this.psd_resetText,
+      positive: () => {
+        this.psdResetController.close()
+      },
+      negative: () => {
+        this.psdResetController.close()
+      }
+    })
   })
 
   async aboutToAppear() {
@@ -101,6 +120,7 @@ struct LoginHome {
             this.accountText = ''
             this.psdText = ''
             this.count = 0
+            this.achieve_sms=true
           }
         })
 
@@ -141,6 +161,7 @@ struct LoginHome {
           placeholder: this.checked == 'psd' ? $r('app.string.phone_input') : $r('app.string.sms_verity'),
           text: this.accountText
         })
+          .type(InputType.Number)
           .style(TextInputStyle.Inline)
           .border({ width: 0 })
           .backgroundColor(Color.White)
@@ -175,13 +196,28 @@ struct LoginHome {
             Logger.debug('密码', this.psdText)
           })
 
-        Text('获取验证码')
+        Text(this.achieve_sms ? '获取验证码' : '重新获取(' + this.timer + ')')
           .visibility(this.checked == 'sms' ? Visibility.Visible : Visibility.Hidden)
           .textAlign(TextAlign.End)
           .width('30%')
           .fontSize(16)
-          .fontColor($r('app.color.color_CCCCCC'))
+          .fontColor(this.checked == 'sms' && CommonUtils.checkIsEmpty(this.accountText) == false ? $r('app.color.color_17B9C5') : $r('app.color.color_CCCCCC'))
+          .onClick(() => {
+            if (this.checked == 'sms' && CommonUtils.checkIsEmpty(this.accountText) == false && this.achieve_sms == true) {
+              this.achieve_sms = false
 
+              let skipWait = setInterval(() => {
+                this.timer--;
+                if (this.timer === 0) {
+                  clearInterval(skipWait);
+                  this.achieve_sms = true
+                }
+              }, 1000)
+
+              //获取验证码
+              requestSmsCode(this.accountText)
+            }
+          })
       }.margin({
         top: '15vp',
       })
@@ -209,55 +245,47 @@ struct LoginHome {
             if (this.privacy_checkOn) {
 
               let map = new Map<string, string>()
-              map.set("username", this.accountText)
-              map.set("encryptPwd", await CommonUtils.getMd5String(this.psdText))
+              if (this.mode == 'psd') {
+                map.set("username", this.accountText)
+                map.set("encryptPwd", await CommonUtils.getMd5String(this.psdText))
+              } else {
+                map.set("mobile", this.accountText)
+                map.set("smsVcode", this.psdText)
+              }
               map.set("clientType", "ANDROID")
               map.set("operatingSystem", deviceInfo.osFullName)
               map.set("mobileType", deviceInfo.productModel)
+              map.set("deviceId", deviceInfo.udid)
               map.set("mobileBrand", "HUAWEI")
 
               let bundleFlags = bundleManager.BundleFlag.GET_BUNDLE_INFO_DEFAULT
 
               try {
+                this.isLoading = true
+
                 bundleManager.getBundleInfoForSelf(bundleFlags).then((data) => {
                   Logger.debug(Constants.TAG, "getBundleInfoForSelf success：" + JSON.stringify(data))
-
                   map.set("clientVersion", data.versionName)
 
-                  // map.forEach((value,key)=>{
-                  //   Logger.debug(Constants.TAG,"打印的map为:"+key+":"+value)
-                  // })
-                  getLoginPsdList(map).then((data) => {
-                    switch (data.code) {
-                      case Constants.SUCCESS:
-                        router.replaceUrl({
-                          url: 'pages/MainPage',
-                        }), router.RouterMode.Standard, (err) => {
-                          if (err) {
-                            Logger.error(Constants.TAG, `LoginHome push to MainPage is failed,code is ${err.code},message is ${err.message}`);
-                            return;
-                          }
-                          Logger.debug(Constants.TAG, ` LoginHome push to MainPage is success`)
-                        }
-                        break;
-                      case Constants.FAILURE:
-                        this.psdWrongController.open()
-                        Logger.debug(Constants.TAG, ` LoginHome push to MainPage is failure` + JSON.stringify(data))
-                        let flag = data.data.flag
-                        if (flag == 2) {
-                          this.count++
+                  /**
+                   * 登录接口
+                   */
+                  if (this.mode == 'psd') {
+                    getLoginPsdList(map).then((data) => {
+                      this.requestLogin('psd', data);
+                    })
+                  } else {
+                    getLoginSmsList(map).then((data) => {
+                      this.requestLogin('sms', data);
+                    })
+                  }
 
-                        }
 
-                        break;
-                    }
-
-                  })
                 }).catch(err => {
-                  Logger.info(Constants.TAG, "getBundleInfoForSelf failed. Cause: %{public}s" + err.message)
+                  Logger.debug(Constants.TAG, "getBundleInfoForSelf failed. Cause: %{public}s" + err.message)
                 })
               } catch (err) {
-                Logger.error(Constants.TAG, "getBundleInfoForSelf failed: %{public}s" + err.message)
+                Logger.debug(Constants.TAG, "getBundleInfoForSelf failed: %{public}s" + err.message)
               }
 
             } else {
@@ -265,13 +293,13 @@ struct LoginHome {
             }
           }
         })
-
       Row() {
         Text('注册').fontSize('13fp').fontColor($r('app.color.color_646464'))
         Text('忘记密码').fontSize('13fp').fontColor($r('app.color.color_949494'))
       }.width('100%').margin({
         top: '15vp'
       }).justifyContent(FlexAlign.SpaceBetween)
+
 
       //隐私政策，用户协议
       Row() {
@@ -319,6 +347,10 @@ struct LoginHome {
         top: '10vp'
       }).justifyContent(FlexAlign.Start)
 
+      Row() {
+        Loading()
+      }.height('70vp').visibility(this.isLoading ? Visibility.Visible : Visibility.None)
+
     }
     .padding({
       left: '25vp',
@@ -331,8 +363,62 @@ struct LoginHome {
     .justifyContent(FlexAlign.Start)
 
   }
+
+  /**
+   *请求登录接口
+   */
+  requestLogin(mode: string, data: any) {
+    this.isLoading = false
+    switch (data.code) {
+      case Constants.SUCCESS:
+        JumpUtils.jumpToMainPage()
+        break;
+      case Constants.FAILURE:
+        Logger.debug(Constants.TAG, ` LoginHome push to MainPage is failure` + JSON.stringify(data))
+        let flag = data.data.flag
+
+        this.LoginDataResult(flag, data.msg,mode)
+        break;
+    }
+
+  }
+
+  /**
+   * flag==2   count<2 密码错误提示  count>2  重置密码
+   * flag==-1  未注册
+   * else      后端返回的msg
+   */
+  LoginDataResult(flag: number, msg: string,mode:string) {
+    if (flag == 2) {
+      if (mode=='psd'){
+        if (this.count < 2) {
+          this.count++
+          this.psdResetController.open()
+        } else {
+          this.psdWrongController.open()
+        }
+      }else{
+        promptAction.showToast({ message: msg })
+      }
+    } else if (flag == -1) {
+      this.noRegisterController.open()
+    } else {
+      promptAction.showToast({ message: msg })
+    }
+  }
 }
 
+/**
+ * 获取验证码接口
+ */
+function requestSmsCode(mobile: string) {
+  sendSmsCode(mobile).then((response) => {
+    if (response.code == Constants.SUCCESS) {
+      Logger.debug(Constants.TAG, "getSmsCode：" + JSON.stringify(response))
+    }
+  })
+
+}
 
 
 

@@ -1,5 +1,5 @@
 /**
- * 启动页
+ * 启动页单张图片
  */
 import Constants from '../../common/Constants';
 
