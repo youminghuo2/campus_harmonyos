@@ -1,9 +1,10 @@
 {
   "src": [
     "pages/Index",
-    "pages/LoginHome",
+    "pages/LoginHomePage",
     "pages/WebView",
     "pages/MainPage",
-    "pages/SplashPage"
+    "pages/SplashPage",
+    "pages/RegisterPage"
   ]
 }

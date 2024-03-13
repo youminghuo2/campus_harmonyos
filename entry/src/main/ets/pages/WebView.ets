@@ -15,7 +15,6 @@ export default struct WebView {
   }
 
   build() {
-    Row() {
       Column() {
         TitleBar({
           title: this.title,
@@ -24,9 +23,7 @@ export default struct WebView {
 
         webViewCompose({ url:$url })
       }
-      .width('100%').height('100%')
-    }.width('100%')
-    .height('100%')
+      .width('100%')
   }
 }
 
@@ -37,10 +34,8 @@ struct webViewCompose {
   webviewController: web_webview.WebviewController = new web_webview.WebviewController();
 
   build(){
-    Scroll(){
       Column(){
-        Web({ src:this.url, controller: this.webviewController })
+        Web({ src:this.url, controller: this.webviewController }).height('100%').width('100%')
       }
-    }.scrollable(ScrollDirection.Vertical)
   }
 }

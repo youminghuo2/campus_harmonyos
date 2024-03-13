@@ -10,7 +10,7 @@ import { PreferencesUtil } from '../common/PreferencesUtil';
 import SpKey from '../common/SpKey';
 import TwoBtnDialog from '../frame/dialog/TwoBtnDialog';
 import promptAction from '@ohos.promptAction';
-import Loading from '../frame/ui/Loading';
+// import Loading from '../frame/ui/Loading';
 import { getLoginPsdList, getLoginSmsList, sendSmsCode } from '../network/api/basicdataApi';
 import JumpUtils from '../common/JumpUtils';
 
@@ -30,7 +30,7 @@ struct LoginHome {
   //checkbox是否勾选
   @State privacy_checkOn: boolean = false
   private count: number = 0
-  @State isLoading: boolean = false
+  // @State isLoading: boolean = false
 
   //是否显示获取验证码 or 几秒后获取
   @State achieve_sms: boolean = true
@@ -261,7 +261,7 @@ struct LoginHome {
               let bundleFlags = bundleManager.BundleFlag.GET_BUNDLE_INFO_DEFAULT
 
               try {
-                this.isLoading = true
+                // this.isLoading = true
 
                 bundleManager.getBundleInfoForSelf(bundleFlags).then((data) => {
                   Logger.debug(Constants.TAG, "getBundleInfoForSelf success：" + JSON.stringify(data))
@@ -347,9 +347,10 @@ struct LoginHome {
         top: '10vp'
       }).justifyContent(FlexAlign.Start)
 
-      Row() {
-        Loading()
-      }.height('70vp').visibility(this.isLoading ? Visibility.Visible : Visibility.None)
+      // Row() {
+        // Loading()
+      // }.height('70vp')
+      // .visibility(this.isLoading ? Visibility.Visible : Visibility.None)
 
     }
     .padding({
@@ -368,7 +369,7 @@ struct LoginHome {
    *请求登录接口
    */
   requestLogin(mode: string, data: any) {
-    this.isLoading = false
+    // this.isLoading = false
     switch (data.code) {
       case Constants.SUCCESS:
         JumpUtils.jumpToMainPage()
@@ -398,12 +399,12 @@ struct LoginHome {
           this.psdWrongController.open()
         }
       }else{
-        promptAction.showToast({ message: msg })
+        promptAction.showToast({ message: msg ,bottom:400})
       }
     } else if (flag == -1) {
       this.noRegisterController.open()
     } else {
-      promptAction.showToast({ message: msg })
+      promptAction.showToast({ message: msg ,bottom:400})
     }
   }
 }

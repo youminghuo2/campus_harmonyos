@@ -9,7 +9,7 @@ export class JumpUtils{
 
   public jumpToLoginHome(){
     router.replaceUrl({
-      url: 'pages/LoginHome'
+      url: 'pages/LoginHomePage'
     });
   }
 
