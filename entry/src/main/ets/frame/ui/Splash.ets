@@ -1,6 +1,3 @@
-/**
- * 启动页单张图片
- */
 import Constants from '../../common/Constants';
 
 import { getBylication } from '../../network/api/portalApi';
@@ -10,6 +7,9 @@ import { PreferencesUtil } from '../../common/PreferencesUtil';
 import SpKey from '../../common/SpKey';
 import JumpUtils from '../../common/JumpUtils';
 
+/**
+ * 启动页单张图片
+ */
 @Component
 export struct Splash {
   @State mSplash: SplashEntity = new SplashEntity(3);

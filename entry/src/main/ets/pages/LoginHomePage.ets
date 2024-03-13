@@ -13,6 +13,8 @@ import promptAction from '@ohos.promptAction';
 // import Loading from '../frame/ui/Loading';
 import { getLoginPsdList, getLoginSmsList, sendSmsCode } from '../network/api/basicdataApi';
 import JumpUtils from '../common/JumpUtils';
+import Toast from '../frame/ui/Toast';
+import MaterialButton from '../frame/ui/MaterialButton';
 
 /**
  * 登录主界面
@@ -20,7 +22,6 @@ import JumpUtils from '../common/JumpUtils';
 @Entry
 @Component
 struct LoginHome {
-  @State message: string = 'Hello World'
   @State checked: string = "psd"
   @State isLogin: boolean = false
   @State accountText: string = ""
@@ -44,15 +45,6 @@ struct LoginHome {
       content: this.psd_wrongText,
       positive: () => {
         this.psdWrongController.close()
-      }
-    })
-  })
-  private privacy_Text = '请先勾选同意下方协议'
-  privacyController: CustomDialogController = new CustomDialogController({
-    builder: OneBtnDialog({
-      content: this.privacy_Text,
-      positive: () => {
-        this.privacyController.close()
       }
     })
   })
@@ -120,7 +112,7 @@ struct LoginHome {
             this.accountText = ''
             this.psdText = ''
             this.count = 0
-            this.achieve_sms=true
+            this.achieve_sms = true
           }
         })
 
@@ -224,23 +216,10 @@ struct LoginHome {
 
       Divider().margin({}).strokeWidth('1vp').color($r('app.color.line_color'))
 
-      Button($r('app.string.login_at'), {
-        type: ButtonType.Normal
-      })
-        .borderRadius(8)
-        .margin({
-          top: '25vp'
-        })
-        .fontSize(16)
-        .fontColor(Color.White)
-        .backgroundColor($r('app.color.color_17B9C5'))
-        .width('100%')
-        .height('50vp')
-        .opacity(
-          // 0.5
-          CommonUtils.checkIsNotEmptyLogin(this.accountText, this.psdText) ? 1 : 0.5
-        )
-        .onClick(async () => {
+      MaterialButton({
+        text:'立即登录',
+        opacitys:CommonUtils.checkIsNotEmptyLogin(this.accountText, this.psdText),
+        onClickListener:async ()=>{
           if (CommonUtils.checkIsNotEmptyLogin(this.accountText, this.psdText)) {
             if (this.privacy_checkOn) {
 
@@ -289,12 +268,16 @@ struct LoginHome {
               }
 
             } else {
-              this.privacyController.open()
+              Toast.makeText('请先勾选同意下方协议')
             }
           }
-        })
+        }
+      })
+
       Row() {
-        Text('注册').fontSize('13fp').fontColor($r('app.color.color_646464'))
+        Text('注册').fontSize('13fp').fontColor($r('app.color.color_646464')).onClick(()=>{
+          JumpUtils.JumpToRegisterPage()
+        })
         Text('忘记密码').fontSize('13fp').fontColor($r('app.color.color_949494'))
       }.width('100%').margin({
         top: '15vp'
@@ -310,37 +293,13 @@ struct LoginHome {
             this.privacy_checkOn = isOn
           }).width(12).height(12)
 
-        Text($r('app.string.agree_privacy')).fontSize('11fp').fontColor($r('app.color.color_949494'))
+        Text($r('app.string.agree_privacy')).fontSize(11).fontColor($r('app.color.color_949494'))
         Text($r('app.string.user_agree')).fontSize('11fp').fontColor($r('app.color.color_17B9C5')).onClick(() => {
-          router.pushUrl({
-            url: 'pages/WebView',
-            params: {
-              url: 'https://www.jyjyapp.com/terms/agreement.html',
-              title: $r('app.string.user_agree')
-            }
-          }), router.RouterMode.Standard, (err => {
-            if (err) {
-              Logger.error(Constants.TAG, `agree_privacy LoginHome push to Webview is failed,code is ${err.code},message is ${err.message}`);
-              return;
-            }
-            Logger.debug(Constants.TAG, `agree_privacy LoginHome push to Webview is success`)
-          });
+          JumpUtils.JumpToWebView('https://www.jyjyapp.com/terms/agreement.html', $r('app.string.user_agree'))
         })
-        Text($r('app.string.and')).fontSize('11fp').fontColor($r('app.color.color_949494'))
-        Text($r('app.string.privacy_policy')).fontSize('11fp').fontColor($r('app.color.color_17B9C5')).onClick(() => {
-          router.pushUrl({
-            url: 'pages/WebView',
-            params: {
-              url: 'https://www.jyjyapp.com/terms/privacy.html',
-              title: $r('app.string.privacy_policy')
-            }
-          }), router.RouterMode.Standard, (err => {
-            if (err) {
-              Logger.error(Constants.TAG, `privacy LoginHome push to Webview is failed,code is ${err.code},message is ${err.message}`);
-              return;
-            }
-            Logger.debug(Constants.TAG, `privacy LoginHome push to Webview is success`)
-          });
+        Text($r('app.string.and')).fontSize(11).fontColor($r('app.color.color_949494'))
+        Text($r('app.string.privacy_policy')).fontSize(11).fontColor($r('app.color.color_17B9C5')).onClick(() => {
+          JumpUtils.JumpToWebView('https://www.jyjyapp.com/terms/privacy.html', $r('app.string.privacy_policy'))
         })
 
       }.width('100%').margin({
@@ -348,7 +307,7 @@ struct LoginHome {
       }).justifyContent(FlexAlign.Start)
 
       // Row() {
-        // Loading()
+      // Loading()
       // }.height('70vp')
       // .visibility(this.isLoading ? Visibility.Visible : Visibility.None)
 
@@ -375,10 +334,9 @@ struct LoginHome {
         JumpUtils.jumpToMainPage()
         break;
       case Constants.FAILURE:
-        Logger.debug(Constants.TAG, ` LoginHome push to MainPage is failure` + JSON.stringify(data))
         let flag = data.data.flag
 
-        this.LoginDataResult(flag, data.msg,mode)
+        this.LoginDataResult(flag, data.msg, mode)
         break;
     }
 
@@ -389,22 +347,22 @@ struct LoginHome {
    * flag==-1  未注册
    * else      后端返回的msg
    */
-  LoginDataResult(flag: number, msg: string,mode:string) {
+  LoginDataResult(flag: number, msg: string, mode: string) {
     if (flag == 2) {
-      if (mode=='psd'){
+      if (mode == 'psd') {
         if (this.count < 2) {
           this.count++
           this.psdResetController.open()
         } else {
           this.psdWrongController.open()
         }
-      }else{
-        promptAction.showToast({ message: msg ,bottom:400})
+      } else {
+        Toast.makeText(msg)
       }
     } else if (flag == -1) {
       this.noRegisterController.open()
     } else {
-      promptAction.showToast({ message: msg ,bottom:400})
+      Toast.makeText(msg)
     }
   }
 }
@@ -413,7 +371,9 @@ struct LoginHome {
  * 获取验证码接口
  */
 function requestSmsCode(mobile: string) {
-  sendSmsCode(mobile).then((response) => {
+   let map = new Map<string, string>()
+    map.set("mobile",mobile)
+  sendSmsCode(map).then((response) => {
     if (response.code == Constants.SUCCESS) {
       Logger.debug(Constants.TAG, "getSmsCode：" + JSON.stringify(response))
     }

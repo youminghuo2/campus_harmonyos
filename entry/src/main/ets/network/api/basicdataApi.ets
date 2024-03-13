@@ -13,12 +13,17 @@ export function getLoginInfo(header){
 }
 
 // //获取验证码
-export function sendSmsCode(mobile){
-  return request(`basicdata/index/resetpwd/sendsmsvcode`,http.RequestMethod.GET,mobile)
+export function sendSmsCode(data){
+  return request(`basicdata/index/login/bysmsvcode/sendsmsvcode`,http.RequestMethod.GET,data)
 }
 
 //验证码登录
 export function getLoginSmsList(data){
   return request(`basicdata/index/login/bysmsvcode`,http.RequestMethod.GET,data)
+}
+
+//注册发送验证码
+export function registerSmsCode(data){
+  return request(`basicdata/index/regist/bymobile/sendsmsvcode`,http.RequestMethod.GET,data)
 }
 

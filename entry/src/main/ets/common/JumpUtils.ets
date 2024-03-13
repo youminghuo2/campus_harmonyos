@@ -7,21 +7,67 @@ import Logger from './Logger';
  */
 export class JumpUtils{
 
+  //跳转登录页
   public jumpToLoginHome(){
     router.replaceUrl({
       url: 'pages/LoginHomePage'
     });
   }
 
+  //跳转主页
   public jumpToMainPage(){
     router.replaceUrl({
       url: 'pages/MainPage',
-    }), router.RouterMode.Standard, (err) => {
+    }), (err) => {
       if (err) {
-        Logger.error(Constants.TAG, `LoginHome push to MainPage is failed,code is ${err.code},message is ${err.message}`);
+        Logger.error(Constants.TAG, `push to MainPage is failed,code is ${err.code},message is ${err.message}`);
         return;
       }
-      Logger.debug(Constants.TAG, ` LoginHome push to MainPage is success`)
+      Logger.debug(Constants.TAG, `push to MainPage is success`)
+    }
+  }
+
+  //跳转webView
+  public JumpToWebView(url:string,title:Resource){
+    router.pushUrl({
+      url: 'pages/WebView',
+      params: {
+        url: url,
+        title: title
+      }
+    }), (err => {
+      if (err) {
+        Logger.error(Constants.TAG, ` push to WebviewPage is failed,code is ${err.code},message is ${err.message}`);
+        return;
+      }
+      Logger.debug(Constants.TAG, `push to WebviewPage is success`)
+    });
+  }
+
+
+  //跳转注册界面
+  public JumpToRegisterPage(){
+    router.pushUrl({
+      url: 'pages/RegisterPage',
+    }), (err) => {
+      if (err) {
+        Logger.error(Constants.TAG, `push to register is failed,code is ${err.code},message is ${err.message}`);
+        return;
+      }
+      Logger.debug(Constants.TAG, `push to register is success`)
+    }
+  }
+
+  //跳转家长账号注册接收二维码界面
+  public JumpToRegisterSmsPage(){
+    router.pushUrl({
+      url: 'pages/RegisterSmsPage',
+    }), (err) => {
+      if (err) {
+        Logger.error(Constants.TAG, `push to registerSmsPage is failed,code is ${err.code},message is ${err.message}`);
+        return;
+      }
+      Logger.debug(Constants.TAG, `push to registerSmsPage is success`)
     }
   }
 

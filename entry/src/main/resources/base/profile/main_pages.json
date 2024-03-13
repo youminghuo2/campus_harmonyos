@@ -5,6 +5,7 @@
     "pages/WebView",
     "pages/MainPage",
     "pages/SplashPage",
-    "pages/RegisterPage"
+    "pages/RegisterPage",
+    "pages/RegisterSmsPage"
   ]
 }

@@ -1,3 +1,7 @@
+/**
+ * 通用loading
+ */
+
 @Component
 @Entry
 export default struct Loading {

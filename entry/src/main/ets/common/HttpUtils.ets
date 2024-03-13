@@ -1,9 +1,10 @@
 /**
  * 网络请求框架
- * data如果是GET形式，多个参数建议 data以Map<String,Object>形式传递 单个参数任意
+ * data如果是GET形式，以Map<String,Object>形式传递
  */
 import http from '@ohos.net.http';
 import promptAction from '@ohos.promptAction';
+import Toast from '../frame/ui/Toast';
 import Response from '../network/entity/Response';
 
 import CommonUtils from './CommonUtils';
@@ -32,9 +33,6 @@ export async function request(url: string, method: http.RequestMethod, data?: an
     Logger.debug(Constants.TAG, `---------------------------------------------------------------------------------------------------`)
 
     url = url.includes('?') ? `${url}&${urlParams}` : `${url}?${urlParams}`;
-  }else if (method==http.RequestMethod.GET ){
-     //这边是data只有一个的情况
-    url = url.includes('?') ? `${url}&${data}` : `${url}?${data}`;
   }
 
   Logger.debug(Constants.TAG, `base url 请求地址 is ${base_url + url}`)
@@ -68,12 +66,10 @@ export async function request(url: string, method: http.RequestMethod, data?: an
             saveTokenAndRefresh(JSON.stringify(value.header))
           }
         })
-
-        // promptAction.showToast({ message: response.msg })
         Logger.debug(Constants.TAG, `接口结果:${response.msg}`)
         return response;
       }if (response.code == Constants.FAILURE) {
-        promptAction.showToast({ message: response.msg })
+        Toast.makeText(response.msg)
         return response;
       }
     } else {
@@ -86,7 +82,7 @@ export async function request(url: string, method: http.RequestMethod, data?: an
     tagLog(response)
     // response.msg = '请求错误';
     // response.code = 400;
-    promptAction.showToast({ message: response.msg })
+    Toast.makeText(response.msg)
     return response;
   });
   Logger.debug(Constants.TAG, `---------------------------------------------------------------------------------------------------`)
