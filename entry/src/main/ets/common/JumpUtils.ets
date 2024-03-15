@@ -59,9 +59,12 @@ export class JumpUtils{
   }
 
   //跳转家长账号注册接收二维码界面
-  public JumpToRegisterSmsPage(){
+  public JumpToRegisterSmsPage(phone:string){
     router.pushUrl({
       url: 'pages/RegisterSmsPage',
+      params:{
+        "phone":phone
+      }
     }), (err) => {
       if (err) {
         Logger.error(Constants.TAG, `push to registerSmsPage is failed,code is ${err.code},message is ${err.message}`);

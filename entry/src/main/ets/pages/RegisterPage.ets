@@ -130,7 +130,7 @@ struct RegisterPage {
   registerDataResult(data: any) {
     switch (data.code) {
       case Constants.SUCCESS:
-        JumpUtils.JumpToRegisterSmsPage()
+        JumpUtils.JumpToRegisterSmsPage(this.phoneText)
         break;
       case Constants.FAILURE:
         let flag = data.data.flag
